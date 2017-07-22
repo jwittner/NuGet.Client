@@ -45,7 +45,7 @@ namespace NuGet.Build.Tasks.Pack.Test
 
                     // Validate the assets.
                     var libItems = nupkgReader.GetLibItems().ToList();
-                    Assert.Equal(1, libItems.Count);
+                    Assert.Equal(3, libItems.Count);
                     Assert.Equal(FrameworkConstants.CommonFrameworks.Net45, libItems[0].TargetFramework);
                     Assert.Equal(new[] { "lib/net45/a.dll" }, libItems[0].Items);
                 }
