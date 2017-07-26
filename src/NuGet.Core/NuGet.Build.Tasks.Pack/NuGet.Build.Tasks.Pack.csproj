@@ -73,6 +73,29 @@
     <Exec Command="$(IlmergeCommand)" ContinueOnError="false" />
   </Target>
 
+  <Target Name="ILMergeNuGetPackResources">
+    <ItemGroup>
+      <_OutputPathContents Include="$(OutputPath)**\*"/>
+      <_OutputPathDirs Include="$([System.IO.Directory]::GetParent(%(_OutputPathContents.Identity)))"/>
+      <_CultureDirs Include="@(_OutputPathDirs->Distinct())" Condition=" '$([System.IO.Directory]::GetFiles(%(_OutputPathDirs.Identity), *.Resources.dll).get_Length())' != 0">
+      </_CultureDirs>
+
+      <_CultureDirs Include="@(_CultureDirs->Distinct())" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(ILMergeResultDir)"/>
+    <ItemGroup>
+      <BuildArtifacts Include="$(OutputPath)*.dll" Exclude="$(OutputPath)*Pack.dll" />
+    </ItemGroup>
+    <PropertyGroup>
+      <PathToMergedNuGetPack>$(ILMergeResultDir)\NuGet.Build.Tasks.Pack.dll</PathToMergedNuGetPack>
+      <IlmergeCommand>$(ILMergeExePath) $(OutputPath)NuGet.Build.Tasks.Pack.dll @(BuildArtifacts, ' ') /out:$(PathToMergedNuGetPack) /lib:$(DotnetSharedSDKDirectory) /lib:$(OutputPath)$(RuntimeIdentifier)\publish /internalize /xmldocs /log:$(ILMergeResultDir)\IlMergeLog.txt</IlmergeCommand>
+      <IlmergeCommand Condition="Exists($(MS_PFX_PATH))">$(IlmergeCommand) /delaysign /keyfile:$(MS_PFX_PATH)</IlmergeCommand>
+    </PropertyGroup>
+    <Message Importance="High" Text="OutputPath: $(OutputPath)" />
+    <Message Importance="High" Text="_CultureDirs: @(_CultureDirs, '%0a')" />
+  </Target>
+
   <Import Project="$(BuildCommonDirectory)common.targets" />
   
   <PropertyGroup>
