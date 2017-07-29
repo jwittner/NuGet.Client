@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -39,7 +39,15 @@ namespace NuGet.Test.Utility
                     }
                     else
                     {
-                        var fullPath = Path.Combine(Root, ConfigFile);
+                        // On VSTS CI Machines, we don't copy the config file to roaming app data folder to avoid
+                        // corrupting machines. We check if the environment variable "NuGet.Core.FuncTests.Config" is set on
+                        // VSTS CI machines, and if it is, then we take that path, otherwise we revert to old behavior of
+                        // discovering in user's roaming app data folder.
+                        var fullPath = Environment.GetEnvironmentVariable("NuGet_Core_FuncTests_Config");
+                        if(string.IsNullOrEmpty(fullPath))
+                        {
+                            fullPath = Path.Combine(Root, ConfigFile);
+                        }
 
                         // Skip if a file does not exist, otherwise run the test.
                         if (!File.Exists(fullPath))
